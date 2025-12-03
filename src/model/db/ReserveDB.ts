@@ -4,6 +4,8 @@ import * as apid from '../../../api';
 import Reserve from '../../db/entities/Reserve';
 import { IReserveUpdateValues } from '../event/IReserveEvent';
 import IPromiseRetry from '../IPromiseRetry';
+import ILogger from '../ILogger';
+import ILoggerModel from '../ILoggerModel';
 import IDBOperator from './IDBOperator';
 import IReserveDB, {
     IFindRuleOption,
@@ -16,10 +18,16 @@ import IReserveDB, {
 
 @injectable()
 export default class ReserveDB implements IReserveDB {
+    private log: ILogger;
     private op: IDBOperator;
     private promieRetry: IPromiseRetry;
 
-    constructor(@inject('IDBOperator') op: IDBOperator, @inject('IPromiseRetry') promieRetry: IPromiseRetry) {
+    constructor(
+        @inject('ILoggerModel') logger: ILoggerModel,
+        @inject('IDBOperator') op: IDBOperator,
+        @inject('IPromiseRetry') promieRetry: IPromiseRetry,
+    ) {
+        this.log = logger.getLogger();
         this.op = op;
         this.promieRetry = promieRetry;
     }
@@ -40,7 +48,7 @@ export default class ReserveDB implements IReserveDB {
         let hasError = false;
         try {
             // 削除
-            await queryRunner.manager.delete(Reserve, {});
+            await queryRunner.manager.clear(Reserve);
 
             // 挿入処理
             for (const item of items) {
@@ -48,7 +56,7 @@ export default class ReserveDB implements IReserveDB {
             }
             await queryRunner.commitTransaction();
         } catch (err: any) {
-            console.error(err);
+            this.log.system.error(err);
             hasError = err;
             await queryRunner.rollbackTransaction();
         } finally {
@@ -131,7 +139,7 @@ export default class ReserveDB implements IReserveDB {
 
             await queryRunner.commitTransaction();
         } catch (err: any) {
-            console.error(err);
+            this.log.system.error(err);
             hasError = true;
             await queryRunner.rollbackTransaction();
         } finally {

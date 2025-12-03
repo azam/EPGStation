@@ -48,6 +48,20 @@ export default class DBOperator implements IDBOperator {
             connection = new DataSource({
                 type: 'sqlite',
                 database: path.join(appRootPath, 'data', 'database.db'),
+                busyTimeout: 90000,
+                enableWAL: true,
+                synchronize: false,
+                logging: false,
+                entities: [entitie],
+                subscribers: [subscriber],
+                migrationsRun: true,
+                migrations: migrations,
+            });
+        } else if (this.config.dbtype === 'better-sqlite3') {
+            connection = new DataSource({
+                type: 'better-sqlite3',
+                database: path.join(appRootPath, 'data', 'database.db'),
+                enableWAL: true,
                 synchronize: false,
                 logging: false,
                 entities: [entitie],
