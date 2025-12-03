@@ -86,7 +86,6 @@ export default class ProgramDB implements IProgramDB {
         let hasError = false;
         try {
             // 削除
-            // const deleteOption = deleteChannelIds.length === 0 ? {} : { channelId: In(deleteChannelIds) };
             if (deleteChannelIds.length === 0) {
                 await queryRunner.manager.clear(Program);
             } else {
